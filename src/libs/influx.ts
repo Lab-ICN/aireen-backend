@@ -1,4 +1,4 @@
-import { InfluxDB, Point, HttpError } from "@influxdata/influxdb-client";
+import { InfluxDB, Point } from "@influxdata/influxdb-client";
 import { config } from "../config";
 import { logger } from "./logger";
 
@@ -32,6 +32,18 @@ export async function writeSensorPoint(nodeId: string, sensor: string, value: nu
     } catch (err) {
         logger.error({ err, nodeId, sensor }, "❌ Failed to write Influx point");
     }
+}
+
+export async function writeSystemPoint(nodeId: string, metric: string, value: number | string) {
+    const point = new Point("system_data")
+        .tag("node_id", nodeId)
+        .tag("metric", metric)
+        .floatField("value", Number(value))
+        .timestamp(new Date());
+
+    const writeApi = influx.getWriteApi("your-org", "prototype2025");
+    writeApi.writePoint(point);
+    await writeApi.close();
 }
 
 export async function flushInflux() {

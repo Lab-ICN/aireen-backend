@@ -1,5 +1,6 @@
 import type { ParsedPayload } from "../types/payload";
 import type { SensorValueMap } from "../types/sensor";
+import type { SystemValueMap } from "../types/system.ts";
 
 export function parsePayload(raw: string): ParsedPayload {
     const trimmed = raw.trim();
@@ -27,14 +28,34 @@ export function inferSensorValue<S extends keyof SensorValueMap>(
     switch (sensor) {
         case "ldr":
         case "tds":
-        case "temp":
-        case "ph":
+        // case "temp":
+        // case "ph":
             return Number(parsed) as SensorValueMap[S];
-        case "status":
-            return (parsed === true || parsed === "true") as SensorValueMap[S];
         case "meta":
             return (typeof parsed === "object" ? parsed : {}) as SensorValueMap[S];
         default:
             return parsed as SensorValueMap[S];
+    }
+}
+
+export function inferSystemValue<M extends keyof SystemValueMap>(
+    metric: M,
+    raw: string
+): SystemValueMap[M] {
+    const parsed = parsePayload(raw);
+
+    switch (metric) {
+        case "rssi":
+        case "heap":
+        case "uptime":
+            return Number(parsed) as SystemValueMap[M];
+
+        case "meta":
+            // data kompleks berbentuk objek
+            return (typeof parsed === "object" ? parsed : {}) as SystemValueMap[M];
+
+        default:
+            // fallback untuk metric lain
+            return parsed as SystemValueMap[M];
     }
 }
