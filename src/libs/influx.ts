@@ -35,14 +35,18 @@ export async function writeSensorPoint(nodeId: string, sensor: string, value: nu
 }
 
 export async function writeSystemPoint(nodeId: string, metric: string, value: number | string) {
-    const point = new Point("system_data")
-        .tag("node_id", nodeId)
-        .tag("metric", metric)
-        .floatField("value", Number(value))
-        .timestamp(new Date());
+    try {
+        const point = new Point("system_data")
+            .tag("node_id", nodeId)
+            .tag("metric", metric)
+            .floatField("value", Number(value))
+            .timestamp(new Date());
 
-    writeApi.writePoint(point);
-    await writeApi.close();
+        writeApi.writePoint(point);
+    } catch (err) {
+        logger.error({ err, nodeId, metric });
+    }
+
 }
 
 export async function flushInflux() {
