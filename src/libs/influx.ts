@@ -41,7 +41,6 @@ export async function writeSystemPoint(nodeId: string, metric: string, value: nu
         .floatField("value", Number(value))
         .timestamp(new Date());
 
-    const writeApi = influx.getWriteApi("your-org", "prototype2025");
     writeApi.writePoint(point);
     await writeApi.close();
 }
